@@ -19,7 +19,7 @@ urlpatterns = [
     # Verify The Token
     path('token/verify/', TokenVerifyView.as_view(), name='token_verify'),
      
-
+    
     path('register/', UserRegistrationView.as_view(), name='UserRegistrationView'),
     path('login/', UserLoginView.as_view(), name='UserLoginView'),
     path('profile/', UserProfileView.as_view(), name='UserProfileView'),

@@ -8,3 +8,4 @@ pytz==2023.3
 sqlparse==0.4.4
 tzdata==2023.3
 django-shopping-cart==0.1
+django-twilio=0.14.3.2

@@ -13,7 +13,9 @@ SECRET_KEY = 'django-insecure-td5i_^eml-9313c8i3d!2r-(h6z@=%okt9a@5mddn8%c6fs0@0
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    '89.107.10.239',
+]
 
 
 # Application definition
@@ -31,6 +33,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'corsheaders',   # For react.js and vue.js 
     'Account',
+    'django_twilio',
 ]
 
 MIDDLEWARE = [
@@ -131,6 +134,10 @@ EMAIL_HOST_PASSWORD = "your password"
 
 
 
+TWILIO_ACCOUNT_SID = 'ACXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX'
+TWILIO_AUTH_TOKEN = 'YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY'
+
+
 #_______________________________________________________________________
 
 
@@ -177,11 +184,16 @@ SIMPLE_JWT = {
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
+    "http://10.0.2.2:80",
+    "http://192.168.126.44:80",
 ]
 
 
 
 PASSWORD_RESET_TIMEOUT = 300        # 900 Sec = 60 * 5 Min = 300 sec
+
+
+
 
 
  
