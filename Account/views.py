@@ -1,7 +1,7 @@
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
 
-from Account.serializers import UserRegistrationSerializer, UserLoginSerializer, UserProfileSerializer, UserChangePasswordSerializer, SendPasswordResetEmailSerializer, UserPasswordResetSerializer
+from Account.serializers import UserRegistrationVerifySerializer,UserRegistrationSerializer, UserLoginSerializer, UserProfileSerializer, UserChangePasswordSerializer, SendPasswordResetEmailSerializer, UserPasswordResetSerializer
 
 from django.shortcuts import render
 
@@ -17,7 +17,7 @@ from rest_framework.permissions import IsAdminUser, IsAuthenticated, IsAuthentic
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
-
+from Account.models import User_OTP
 
 ## Create your views here.-----------------------------------------------------------------------------------
 # NOTE ------------( To understand that there is Error Meggage in Frontend  )--------------------
@@ -56,14 +56,33 @@ class UserRegistrationView(APIView):
     renderer_classes = [UserRenderer]
 
     def post(self, request, format=None):
-        serializer = UserRegistrationSerializer(data=request.data)
+        serializer = UserRegistrationSerializer(data=request.data, context={'request': request})
         if serializer.is_valid(raise_exception=True):
             user = serializer.save()
-            token = get_tokens_for_user(user)   ## Token Genaret
+            # token = get_tokens_for_user(user)   ## Token Genaret
+            print(f"otp is saved in session = { self.context['request'].session['otp'] } ")
+            otp_obj = User_OTP.objects.create(user=user, otp=self.context['request'].session['otp'])
+            print("Your Object = ", otp_obj)
             # return Response({'message':'Registration Successful'}, status=status.HTTP_201_CREATED)
             #return Response({'token': token,'message':'Registration Successful'}, status=status.HTTP_201_CREATED)
-            return Response({'data': {'token':token, 'username':user,'isActivate':True,'isVerified':True},'message':'Registration Successful','success': True, 'status':201})
-        return Response({'message':'Bad Request','success': False, 'status':400})
+            return Response({'message':'Verification Code sent to your email','success': True, 'status':200})
+        return Response({'message': serializer.errors,'success': False, 'status':400})
+
+#_________________________________________________________________________________________
+
+
+# NOTE -------------------( User Registration Verify View ) ------------------------------------
+# URL = ( http://127.0.0.1:8000/register )
+class UserRegistrationVerifyView(APIView):
+    renderer_classes = [UserRenderer]
+
+    def post(self, request,format=None):
+        serializer = UserRegistrationVerifySerializer(data=request.data, context={'request': request})
+        if serializer.is_valid(raise_exception=True):
+            return Response({'message':'Registration Success!','success': True, 'status':201})
+        else:
+            return Response({'message': serializer.errors,'success': False, 'status':400})
+
 
 #_________________________________________________________________________________________
 
@@ -113,7 +132,10 @@ class UserLoginView(APIView):
                         # token = CustomAuthToken(usr)  # Token Genaret 
                         token = get_tokens_for_user(usr)          
                         #return Response({'token': token,'message':'Login Success'}, status=status.HTTP_200_OK)  
-                        return Response({'data': {'token':token, 'username':usr,'isActivate':True,'isVerified':True},'message':'Login Success','success': True, 'status':200})
+                        if user.is_active != 0:
+                            return Response({'data': {'token':token, 'username':usr,'isActivated':True,'isVerified':True},'message':'Login Success','success': True, 'status':200})
+                        else:
+                            return Response({'message':'Login Failed','success': False, 'status':200})
                     else:
                         return Response({'message':'Login Failed','message':'Email or Password is not Valid','success': False, 'status':404})
             except User.DoesNotExist:

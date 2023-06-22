@@ -1,5 +1,15 @@
 from pathlib import Path
 
+
+#from os import environ
+#
+#env = environ.Env()
+#environ.Env.read_env()
+
+import environ
+env = environ.Env()
+environ.Env.read_env()
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -15,6 +25,8 @@ DEBUG = True
 
 ALLOWED_HOSTS = [
     '89.107.10.239',
+    '192.168.126.44',
+    '127.0.0.1'
 ]
 
 
@@ -122,18 +134,23 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
-# Email Configaretion----------------------------------------------------
+# Email Configuration----------------------------------------------------
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
+
+# Bottom of settings.py 
+# Twilio SendGrid
+EMAIL_HOST = 'smtp.sendgrid.net'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-DEFAULT_FROM_EMAIL = 'OTF Team <rakibdiuhassan@gmail.com>'
+EMAIL_HOST_USER = 'apikey' # Name for all the SenGrid accounts
+EMAIL_HOST_PASSWORD = env('SENDGRID_API_KEY')
 
-EMAIL_HOST_USER = "your@email.com"
-EMAIL_HOST_PASSWORD = "your password"
+# The email you'll be sending emails from
+DEFAULT_FROM_EMAIL = env('FROM_EMAIL', default='noreply@gmail.com')
+LOGIN_REDIRECT_URL = 'success'
 
 
-
+# SMS Configuration----------------------------------------------------
 TWILIO_ACCOUNT_SID = 'ACXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX'
 TWILIO_AUTH_TOKEN = 'YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY'
 
@@ -186,7 +203,6 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:3000",
     "http://10.0.2.2:80",
     "http://192.168.126.44:80",
-    "http://89.107.10.239:80"
 ]
 
 

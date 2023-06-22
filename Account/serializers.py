@@ -35,6 +35,34 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         if attrs['password'] != attrs['password2']:
             raise serializers.ValidationError({"password": "Password fields didn't match."})
         
+        email = attrs.get('email')
+        # user = 
+        self.context['request'].session['email'] = email
+
+        otp = random.randint(100000, 999999)
+
+        # Set the timeout on the Django session
+        timeout_datetime = datetime.now() + timedelta( minutes = 5 )
+        self.context['request'].session['timeout'] = timeout_datetime.timestamp()
+        self.context['request'].session['otp'] = otp
+        # if User_OTP.objects.filter(user = user).exists(): # If there is an old otp, it will be deleted now
+        #     User_OTP.objects.get(user = user).delete()
+
+        # otp_obj = User_OTP.objects.create(user = user, otp=otp)
+        print("Your OTP = ", otp)
+        # print("Your Object = ", otp_obj)
+
+        body = f"Hello {email},\nYour OTP is {otp}\nThanks!"
+        #-------------------------------------------------------------------------
+
+        ## Send EMail-------------------------------------------------------------
+        send_mail(
+            "Code for registration",     # Subject
+            body,                      # Body
+            settings.DEFAULT_FROM_EMAIL,  # From
+            [email],              # To
+        )
+
         return attrs
     # NOTE An alternative way for password validation
     """
@@ -49,7 +77,8 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         user = User.objects.create(
             username=validated_data['username'],
-            email=validated_data['email']
+            email=validated_data['email'],
+            is_active=0,
         )
 
         
@@ -130,21 +159,6 @@ class SendPasswordResetEmailSerializer(serializers.Serializer):
             # Store email in the Django session
             self.context['request'].session['email'] = email
 
-            # NOTE If You send link on your email-------------------------------------
-            # uid = urlsafe_base64_encode(force_bytes(user.id))
-            # print('Encoded UID', uid)
-
-            # token = PasswordResetTokenGenerator().make_token(user)  #  If we want to set a time, after that time the user can no longer verify
-            # print('Password Reset Token', token)                    #  with that token, for this PASSWORD_RESET_TIMEOUT = 300
-            #                                                         #  i.e. 5min has been set.
-
-            # link = 'http://127.0.0.1:8000/reset-password-email-verify/'+uid+'/'+token  # Since clicking on this link will run react.js or vue.js,
-            # print('Password Reset Link', link)                            # so the localhost link should be given.
-
-            # body = 'Click Following Link to Reset Your Password '+link
-
-
-            # NOTE If You send OTP on your email-------------------------------------
             otp = random.randint(100000, 999999)
 
             # Set the timeout on the Django session
@@ -158,16 +172,15 @@ class SendPasswordResetEmailSerializer(serializers.Serializer):
             print("Your OTP = ", otp)
             print("Your Object = ", otp_obj)
 
-            body = f"Hello {user.first_name}{user.last_name},\nYour OTP is {otp}\nThanks!"
+            body = f"Hello {user.email},\nYour OTP is {otp}\nThanks!"
             #-------------------------------------------------------------------------
 
             ## Send EMail-------------------------------------------------------------
             send_mail(
                 "Reset Your Password",     # Subject
                 body,                      # Body
-                settings.EMAIL_HOST_USER,  # From
+                settings.DEFAULT_FROM_EMAIL,  # From
                 [user.email],              # To
-                fail_silently = False
             )
             #_________________________________________________________________________
             return attrs
@@ -260,6 +273,38 @@ class UserPasswordResetSerializer(serializers.Serializer):
 #_____________________________________________________________________________________________________
 
 
+class UserRegistrationVerifySerializer(serializers.Serializer):
+    otp = serializers.IntegerField()
+    class Meta:
+        fields = ['otp']
+
+    def validate(self, attrs):
+        otp = attrs.get('otp')
+        
+        email = self.context['request'].session.get('email')
+        timeout_timestamp = self.context['request'].session.get('timeout')
+
+        timeout_datetime = datetime.fromtimestamp(timeout_timestamp)
+        if datetime.now() > timeout_datetime:
+            raise serializers.ValidationError("OTP verification time has expired")
+
+        user_obj = User.objects.get(email = email) 
+        otp_obj = User_OTP.objects.get(user = User.objects.get(email=email))
+
+        print("---------------------------")
+        print(f"Request User = {User.objects.get(email=email)}, Correct OTP = {otp_obj.otp}")
+        print("---------------------------")
+
+        
+        
+        if otp != otp_obj.otp:
+            raise serializers.ValidationError("Your OTP doesn't match")
+
+        user_obj.is_active=1
+        user_obj.save()
+        return attrs
+    
+#_____________________________________________________________________________________________________
 
 
 

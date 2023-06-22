@@ -1,5 +1,5 @@
 from django.urls import path, include
-from Account.views import UserRegistrationView, UserLoginView, UserProfileView, UserChangePasswordView, SendPasswordResetEmailView, UserPasswordResetView
+from Account.views import UserRegistrationVerifyView, UserRegistrationView, UserLoginView, UserProfileView, UserChangePasswordView, SendPasswordResetEmailView, UserPasswordResetView
 
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
@@ -21,6 +21,7 @@ urlpatterns = [
      
     
     path('register/', UserRegistrationView.as_view(), name='UserRegistrationView'),
+    path('register-otp-verify', UserRegistrationVerifyView.as_view(), name='UserRegistrationVerifyView'),
     path('login/', UserLoginView.as_view(), name='UserLoginView'),
     path('profile/', UserProfileView.as_view(), name='UserProfileView'),
     path('change-password/', UserChangePasswordView.as_view(), name='UserChangePasswordView'),
