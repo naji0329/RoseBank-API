@@ -22,6 +22,7 @@ urlpatterns = [
     
     path('register/', UserRegistrationView.as_view(), name='UserRegistrationView'),
     path('register-otp-verify', UserRegistrationVerifyView.as_view(), name='UserRegistrationVerifyView'),
+    path("resend-register-otp-mail/", UserRegistrationVerifyView.as_view(), name="UserRegistrationResendVerify"),
     path('login/', UserLoginView.as_view(), name='UserLoginView'),
     path('profile/', UserProfileView.as_view(), name='UserProfileView'),
     path('change-password/', UserChangePasswordView.as_view(), name='UserChangePasswordView'),
