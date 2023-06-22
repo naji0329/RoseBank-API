@@ -60,8 +60,8 @@ class UserRegistrationView(APIView):
         if serializer.is_valid(raise_exception=True):
             user = serializer.save()
             # token = get_tokens_for_user(user)   ## Token Genaret
-            print(f"otp is saved in session = { self.context['request'].session['otp'] } ")
-            otp_obj = User_OTP.objects.create(user=user, otp=self.context['request'].session['otp'])
+            print(f"otp is saved in session = { request.session['otp'] } ")
+            otp_obj = User_OTP.objects.create(user=user, otp=request.session['otp'])
             print("Your Object = ", otp_obj)
             # return Response({'message':'Registration Successful'}, status=status.HTTP_201_CREATED)
             #return Response({'token': token,'message':'Registration Successful'}, status=status.HTTP_201_CREATED)
