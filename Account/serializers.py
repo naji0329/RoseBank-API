@@ -56,12 +56,13 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         #-------------------------------------------------------------------------
 
         ## Send EMail-------------------------------------------------------------
-        send_mail(
-            "Code for registration",     # Subject
-            body,                      # Body
-            settings.DEFAULT_FROM_EMAIL,  # From
-            [email],              # To
-        )
+        # send_mail(
+        #     "Code for registration",     # Subject
+        #     body,                      # Body
+        #     settings.DEFAULT_FROM_EMAIL,  # From
+        #     [email],              # To
+        # )
+        send_mail('Testing mail', 'A cool message :)', settings.DEFAULT_FROM_EMAIL, ['quickrun1212@gmail.com'])
 
         return attrs
     # NOTE An alternative way for password validation
